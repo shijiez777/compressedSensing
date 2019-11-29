@@ -36,12 +36,14 @@ function [perfectRecoveryRatios, avgIterations] = runExperiment(signalCase, sens
         for iter = 1:iterations
             % sensing matrix
             phi = sensingMatGenFun(M, N);
+            A = phi * psi;
+
             x = sigGenFun(N, sparsity);
             
             %% y = phi * x NO MATTER if x is time or frequency sparse!!!
             y = phi * x;
             
-            [~, x_hat, itera] = optiAlgo(phi, psi, y, sparsity, epsilon, freqSparseFlag);
+            [~, x_hat, itera] = optiAlgo(A, y, sparsity, epsilon, freqSparseFlag);
 
             
             if norm((x - x_hat), 2) < epsilon

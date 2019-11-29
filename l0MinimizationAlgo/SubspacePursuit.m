@@ -18,7 +18,6 @@ function [perfect_recovery, residues, x_hat, itera] = SubspacePursuit(A, x, spar
 
         itera = itera + 1;
         residue_prev = residue_new;
-        % sprintf("residue_new: %f, residue_prev: %f\n", norm(residue_new, 2), norm(residue_prev, 2))
 
         % set the columns from A, that gives the argmax of residue*A to be
         % 0, so that the new argmax cannot choose previously chosen n.
@@ -32,8 +31,6 @@ function [perfect_recovery, residues, x_hat, itera] = SubspacePursuit(A, x, spar
         % add new candidate indeces to S set
         S = [S, ciIndeces];
         S = S(:);
-        % disp("added S: ")
-        % disp(S);
         % pruning for the new best S set
         temp = zeros(size(A));
         temp(:, S) = A(:, S);
@@ -42,14 +39,10 @@ function [perfect_recovery, residues, x_hat, itera] = SubspacePursuit(A, x, spar
         [~ ,x_hatIndex] = maxk(abs(tmp), sparsity);
         S = x_hatIndex;
         S = S(:);
-        % disp("updated S: ")
-        % disp(S);
         x_hat(x_hatIndex, 1) = tmp(x_hatIndex, 1);        
         residue_new = y - A*x_hat;
         residues = [residues, norm(residue_new, 2)];
         
-        % sprintf("residue_new: %f, residue_prev: %f\n", norm(residue_new, 2), norm(residue_prev, 2))
-
          if (size(S_prev) == size(S)) & (S_prev == S)
              % sprintf("S set not changing, terminating. Iteration: %d, x_hat l0 norm: %d", itera, sum(x_hat ~= 0))
              break
