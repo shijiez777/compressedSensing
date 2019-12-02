@@ -4,7 +4,7 @@ function [residues, x_hat, itera] = OrthogonalMatchingPursuit(phi, psi, y, spars
     % 2. or when residue = y - A*x_hat stops decreasing
     % iteration equals sparsity
     A = phi * psi;
-    
+
     [~, N] = size(phi);
     x_hat = zeros(N, 1);
     residue_prev = y;
@@ -25,6 +25,7 @@ function [residues, x_hat, itera] = OrthogonalMatchingPursuit(phi, psi, y, spars
         % Because it is calculating the covariance.
         % ATranspose(S, :) = 0;
         tmpPsiInvPhiInvProduct = psiInvPhiInvProduct;
+        tmpPsiInvPhiInvProduct(S, :) = 0;
         
         [~ ,n] = max(abs(tmpPsiInvPhiInvProduct * residue_prev));
         S = [S, n];
@@ -44,7 +45,7 @@ function [residues, x_hat, itera] = OrthogonalMatchingPursuit(phi, psi, y, spars
             x_hat =  dctmtx(N) * x_hat;
         end
         
-        residue_new = y - A*x_hat;
+        residue_new = y - phi *x_hat;
 
         residues = [residues, norm(residue_new, 2)];
         
@@ -56,8 +57,8 @@ function [residues, x_hat, itera] = OrthogonalMatchingPursuit(phi, psi, y, spars
             sprintf("Residue not decreasing, terminating. Iteration: %d, x_hat l0 norm: %d\n", itera, sum(x_hat ~= 0))
             break
         end
-%         if norm((A * x_hat - y), 2) < epsilon
-%             sprintf("A*x_hat - y residue smaller than epsilon, terminating.. Iteration: %d, x_hat l0 norm: %d\n", itera, sum(x_hat~= 0))
+%         if norm((phi * x_hat - y), 2) < epsilon
+%             sprintf("phi * x_hat - y residue smaller than epsilon, terminating.. Iteration: %d, x_hat l0 norm: %d\n", itera, sum(x_hat~= 0))
 %             break
 %         end
     end

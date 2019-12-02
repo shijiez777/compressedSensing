@@ -43,7 +43,8 @@ function [perfectRecoveryRatios, avgIterations] = runExperiment(signalCase, sens
             
             [~, x_hat, itera] = optiAlgo(phi, psi, y, sparsity, epsilon, freqSparseFlag);
 
-            
+            disp(norm((x - x_hat), 2))
+            disp(norm((x - x_hat), 2) < epsilon)
             if norm((x - x_hat), 2) < epsilon
                 perfectRecoveryCounts(Midx) = perfectRecoveryCounts(Midx) + 1;
                 % disp("perfectRecoveryiterations(Midx): ");

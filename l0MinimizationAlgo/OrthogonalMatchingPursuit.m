@@ -4,7 +4,7 @@ function [residues, x_hat, itera] = OrthogonalMatchingPursuit(phi, psi, y, spars
     % 2. or when residue = y - A*x_hat stops decreasing
     % iteration equals sparsity
     A = phi * psi;
-    
+
     [~, N] = size(phi);
     x_hat = zeros(N, 1);
     residue_prev = y;
@@ -17,6 +17,7 @@ function [residues, x_hat, itera] = OrthogonalMatchingPursuit(phi, psi, y, spars
     psiInvPhiInvProduct = inv(psi) * pinv(phi);
     
     while itera < sparsity
+        fprintf("itera: %d\n", itera)
         itera = itera + 1;
         residue_prev = residue_new;
 
