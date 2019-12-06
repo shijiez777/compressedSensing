@@ -3,11 +3,9 @@
 
 
 
-function [residues, x_hat, itera] = SubspacePursuit(phi, psi, y, sparsity, epsilon)
+function [perfect_recovery, residues, x_hat, itera] = SubspacePursuit(A, x, sparsity, epsilon)
     % find best x_hat, such that minimizes ||(A* x_hat - y)||_2 < epsilon
-    
-    A = phi * psi;
-
+    y = A * x;
 
     [~, xLen] = size(A);
     residue_prev = y;
@@ -34,7 +32,7 @@ function [residues, x_hat, itera] = SubspacePursuit(phi, psi, y, sparsity, epsil
         
         
         % find new set of candidates that maximizes the covariance
-        [~ ,ciIndeces] = maxk(abs(ATransposeTemp * residue_prev), 5);
+        [ci ,ciIndeces] = maxk(abs(ATransposeTemp * residue_prev), 5);
         % add new candidate indeces to S set
         S = [S, ciIndeces];
         S = S(:);
@@ -50,13 +48,18 @@ function [residues, x_hat, itera] = SubspacePursuit(phi, psi, y, sparsity, epsil
         residue_new = y - A*x_hat;
         residues = [residues, norm(residue_new, 2)];
         
-         if (size(S_prev) == size(S)) && (S_prev == S)
+         if (size(S_prev) == size(S)) & (S_prev == S)
              % sprintf("S set not changing, terminating. Iteration: %d, x_hat l0 norm: %d", itera, sum(x_hat ~= 0))
              break
          end
          if norm(residue_new, 2) >= norm(residue_prev, 2)
               % sprintf("Residue not decreasing, terminating. Iteration: %d, x_hat l0 norm: %d", itera, sum(x_hat ~= 0))
               break
-         end
+          end
+        if norm((x - x_hat), 2) < epsilon
+            % sprintf("Residue smaller than epsilon, PERFECT RECOVERY, terminating.. Iteration: %d, x_hat l0 norm: %d", itera, sum(x_hat~= 0))
+            perfect_recovery = 1;
+            break
+        end
     end
 end

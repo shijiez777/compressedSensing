@@ -7,11 +7,13 @@ function [perfectRecoveryRatios, avgIterations] = runExperiment(signalCase, sens
         case 'time-sparse' 
             sigGenFun = @generateTimeSparseSignal;
             psi = eye(N);
-            freqSparseFlag = 0;
+            % psiInv = inv(psi);
         case 'freq-sparse'
             sigGenFun = @generateFrequencySparseSignal;
+            %% DCT: time domain to freq domain
             psi = inv(dctmtx(N));
-            freqSparseFlag = 1;
+            % psiInv = inv(psi);
+
     end
     
     switch sensingMatrixCase
@@ -32,7 +34,6 @@ function [perfectRecoveryRatios, avgIterations] = runExperiment(signalCase, sens
 
     for Midx = 1:length(Ms)
         M = Ms(Midx);
-        % disp(M);
         for iter = 1:iterations
             % sensing matrix
             phi = sensingMatGenFun(M, N);
@@ -41,29 +42,28 @@ function [perfectRecoveryRatios, avgIterations] = runExperiment(signalCase, sens
             %% y = phi * x NO MATTER if x is time or frequency sparse!!!
             y = phi * x;
             
-            [~, x_hat, itera] = optiAlgo(phi, psi, y, sparsity, epsilon, freqSparseFlag);
+            [~, x_hat, itera] = optiAlgo(phi, psi, y, sparsity, epsilon);
+            
+            %% converts time-sparse x_hat back to original domain
+            % A = (m x n)
+            % dct(A) = dctmtx(m) * A
+            % idct(A) = inv(dctmtx(m)) * A
+            %% why following line doesnt work???    
+            % x_hat = psiInv * x_hat;
 
-            disp(norm((x - x_hat), 2))
-            disp(norm((x - x_hat), 2) < epsilon)
+            if signalCase == "freq-sparse"
+                x_hat = idct(x_hat);
+
+            end
+            
             if norm((x - x_hat), 2) < epsilon
                 perfectRecoveryCounts(Midx) = perfectRecoveryCounts(Midx) + 1;
-                % disp("perfectRecoveryiterations(Midx): ");
-                % disp(perfectRecoveryiterations(Midx));
-
-                % disp("itera: " + itera);
-                % tmpLen = length(perfectRecoveryiterations(Midx));
                 perfectRecoveryTotalIterations(Midx) = perfectRecoveryTotalIterations(Midx) + itera;
-                % perfectRecoveryiterations(Midx, tmpLen+1) = itera;
             end
         end
     end
     
     perfectRecoveryRatios = perfectRecoveryCounts/iterations;
-%     disp(perfectRecoveryTotalIterations);
-%     disp(perfectRecoveryCounts);
 
     avgIterations = perfectRecoveryTotalIterations ./ perfectRecoveryCounts;
-    % histogram(perfectRecoveryRatios, 5);
-    % plot(1:length(Ms), perfectRecoveryRatios);
-    
 end

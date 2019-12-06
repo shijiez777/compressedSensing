@@ -7,11 +7,12 @@ function [perfectRecoveryRatios, avgIterations] = runExperiment(signalCase, sens
         case 'time-sparse' 
             sigGenFun = @generateTimeSparseSignal;
             psi = eye(N);
-            freqSparseFlag = 0;
         case 'freq-sparse'
             sigGenFun = @generateFrequencySparseSignal;
+            %% DCT: time domain to freq domain
             psi = inv(dctmtx(N));
-            freqSparseFlag = 1;
+            % psi = dctmtx(N);
+
     end
     
     switch sensingMatrixCase
@@ -36,16 +37,21 @@ function [perfectRecoveryRatios, avgIterations] = runExperiment(signalCase, sens
         for iter = 1:iterations
             % sensing matrix
             phi = sensingMatGenFun(M, N);
-            A = phi * psi;
-
             x = sigGenFun(N, sparsity);
             
             %% y = phi * x NO MATTER if x is time or frequency sparse!!!
             y = phi * x;
             
-            [~, x_hat, itera] = optiAlgo(A, y, sparsity, epsilon, freqSparseFlag);
-
+            [~, x_hat, itera] = optiAlgo(phi, psi, y, sparsity, epsilon);
             
+            %% converts time-sparse x_hat back to original domain
+            if signalCase == "freq-sparse"
+                x_hat = idct(x_hat);
+
+            end
+            
+            % disp(norm((x - x_hat), 2))
+            % disp(norm((x - x_hat), 2) < epsilon)
             if norm((x - x_hat), 2) < epsilon
                 perfectRecoveryCounts(Midx) = perfectRecoveryCounts(Midx) + 1;
                 % disp("perfectRecoveryiterations(Midx): ");

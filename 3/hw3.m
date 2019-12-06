@@ -55,14 +55,14 @@ addpath('../l0MinimizationAlgo/');
 % sensingMatrixCase = 'gaussian';
 iterations = 50;
 Ms = [10, 20, 30, 40, 50];
-Ms = [50];
+% Ms = [50];
 
 N = 256;
 sparsity = 5;
 epsilon = 10e-10;
 
 signalCase = 'time-sparse';
-algorithm = 'OMP';
+algorithm = 'SP';
 
-sensingMatrixCases = ["freq-random"; "gaussian"]; % "time-random"; 
+sensingMatrixCases = ["freq-random"; "time-random"; "gaussian"];
 experimentWrapper(signalCase, sensingMatrixCases, algorithm, iterations, Ms, N, sparsity, epsilon);
