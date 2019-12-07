@@ -17,7 +17,6 @@ function [residues, x_hat, itera] = SubspacePursuit(phi, psi, y, sparsity, epsil
     ATranspose = A';
     itera = 0;
     residues = [];
-    perfect_recovery = 0;
     
     while true
         S_prev = S;
@@ -50,7 +49,7 @@ function [residues, x_hat, itera] = SubspacePursuit(phi, psi, y, sparsity, epsil
         residue_new = y - A*x_hat;
         residues = [residues, norm(residue_new, 2)];
         
-         if (size(S_prev) == size(S)) && (S_prev == S)
+         if (size(S_prev) == size(S)) & (S_prev == S)
              % sprintf("S set not changing, terminating. Iteration: %d, x_hat l0 norm: %d", itera, sum(x_hat ~= 0))
              break
          end

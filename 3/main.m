@@ -49,7 +49,8 @@
 
 addpath('../sensingMatrixFunctions/');
 addpath('../sparseSignalGenerations/');
-addpath('../l0MinimizationAlgo/');
+addpath('../l0Minimization/');
+addpath('../helpers/');
 
 
 % sensingMatrixCase = 'gaussian';
@@ -61,8 +62,8 @@ N = 256;
 sparsity = 5;
 epsilon = 10e-10;
 
-signalCase = 'time-sparse';
+signalCase = 'freq-sparse';
 algorithm = 'SP';
 
 sensingMatrixCases = ["freq-random"; "time-random"; "gaussian"];
-experimentWrapper(signalCase, sensingMatrixCases, algorithm, iterations, Ms, N, sparsity, epsilon);
+experimentWrapperandDrawer(signalCase, sensingMatrixCases, algorithm, iterations, Ms, N, sparsity, epsilon);
