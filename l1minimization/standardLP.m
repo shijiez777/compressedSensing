@@ -29,8 +29,8 @@ function [residues, x_hat, itera] = standardLP(phi, psi, y, ~, ~)
 %     
     options = optimoptions('linprog','Display','none');
         
-    [X, ~] = linprog(f, ineqConsLeft, ineqConsRight, Aeq, beq, lb, ub, options);
-    x_hat = X(1:256, :) - X(257:512, :);
+    [X, ~] = linprog(f, ineqConsLeft, ineqConsRight, Aeq, beq, lb, ub, options); %
+    x_hat = X(1:N, :) - X(N+1:N*2, :);
     residues = [];
     itera = inf;
 end
