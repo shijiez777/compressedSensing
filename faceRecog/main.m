@@ -48,39 +48,91 @@ dimRedPhi = dimRedMat * phi;
 
 %% Accuracy - gaussian noise 0.1
 % select random image as test
-correctPredictionCount = 0;
-misclassificationIdx = 1;
-for classId = 1:noClasses
-    disp(classId)
-    testDataMat = testSet(classes(classId));
-    for j = 1: testImgNoPerClass
-        y = testDataMat(j, :);
-        y = y(:);
-        % yNoise = y + 0.1 * randn(size(y));
-        yNoise = y;
-
-        dimRedY = dimRedMat * yNoise;
-        [~, x_hat, itera] = standardLP(dimRedPhi, psi, dimRedY, 0, 0);
-        predictionIdx = predict(x_hat, imgPerClassinDictionary, noClasses);
-        if predictionIdx == classId
-            correctPredictionCount = correctPredictionCount + 1;
-        else
-            result = recover(predictionIdx, x_hat, phi, imgPerClassinDictionary);
-            result = normalize(result, 'range');
-            displayResult(y, yNoise, result, classId, predictionIdx);
+% correctPredictionCount = 0;
+% misclassificationIdx = 1;
+% for classId = 1:noClasses
+%     disp(classId)
+%     testDataMat = testSet(classes(classId));
+%     for j = 1: testImgNoPerClass
+%         y = testDataMat(j, :);
+%         y = y(:);
+%         % yNoise = y + 0.1 * randn(size(y));
+%         yNoise = y;
+% 
+%         dimRedY = dimRedMat * yNoise;
+%         [~, x_hat, itera] = standardLP(dimRedPhi, psi, dimRedY, 0, 0);
+%         predictionIdx = predict(x_hat, imgPerClassinDictionary, noClasses);
+%         if predictionIdx == classId
+%             correctPredictionCount = correctPredictionCount + 1;
+%         else
+%             result = recover(predictionIdx, x_hat, phi, imgPerClassinDictionary);
+%             result = normalize(result, 'range');
 %             saveFileName = "/home/fatken/data/CompressedSensing/results/misclassification/" + misclassificationIdx + ".png";
-%             saveas(1, saveFileName);
+%             displayResult(y, yNoise, result, classId, predictionIdx, 1, saveFileName, misclassificationIdx);
+%             % saveas(misclassificationIdx, saveFileName);
 %             misclassificationIdx = misclassificationIdx + 1;
+%         end
+%     end
+% end
+% sprintf("prediction accuracy: %f\n", correctPredictionCount/double((testImgNoPerClass * noClasses)));
+
+
+
+
+
+%% Uniform noise clissification and recover
+noiseRatios = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]; %
+accuracies = zeros(size(noiseRatios));
+counter = 1;
+for ratioIdx = 1: length(noiseRatios)
+    noiseRatio = noiseRatios(ratioIdx);
+    
+    
+    correctPredictionCount = 0;
+    misclassificationIdx = 1;
+    for classId = 1:noClasses
+        disp(classId)
+        testDataMat = testSet(classes(classId));
+        for j = 1: testImgNoPerClass
+            y = testDataMat(j, :);
+            y = y(:);
+            yNoise = uniformCorrupt(y, noiseRatio);
+            % yNoise = y;
+
+            dimRedY = dimRedMat * yNoise;
+            [~, x_hat, itera] = standardLP(dimRedPhi, psi, dimRedY, 0, 0);
+            predictionIdx = predict(x_hat, imgPerClassinDictionary, noClasses);
+            if predictionIdx == classId
+                %result = recover(predictionIdx, x_hat, phi, imgPerClassinDictionary);
+                %result = normalize(result, 'range');
+                %saveFileName = "/home/fatken/data/CompressedSensing/results/uniformRecover/" + counter + ".png";
+                %displayResult(y, yNoise, result, classId, predictionIdx, 0, saveFileName, counter);
+                correctPredictionCount = correctPredictionCount + 1;
+            else
+                %result = recover(predictionIdx, x_hat, phi, imgPerClassinDictionary);
+                %result = normalize(result, 'range');
+                %saveFileName = "/home/fatken/data/CompressedSensing/results/uniformRecoverMisclassification/" + counter + ".png";
+                %displayResult(y, yNoise, result, classId, predictionIdx, 0, saveFileName, counter);
+                % saveas(misclassificationIdx, saveFileName);
+                misclassificationIdx = misclassificationIdx + 1;
+            end
+            counter = counter + 1;
         end
-    end
-end
-sprintf("prediction accuracy: %f\n", correctPredictionCount/(testImgNoPerClass * noClasses));
+    end 
+    accuracies(ratioIdx) = correctPredictionCount/double((testImgNoPerClass * noClasses));
+end    
+    
+% sprintf("prediction accuracy: %f\n", correctPredictionCount/double((testImgNoPerClass * noClasses)));
+
+
+
+
 
 
 %% Visualization
 % display the original image, the corrupted image, the recovery result, and
 % difference
-function displayResult(y, yNoise, result, label, prediction)
+function displayResult(y, yNoise, result, label, prediction, saveFlag, saveFileName, misclassificationIdx)
     difference = abs(y - result);
     % montage([reshape(y, 192, 168), reshape(yNoise, 192, 168), reshape(result, 192, 168), reshape(difference, 192, 168)]);
 
@@ -101,6 +153,9 @@ function displayResult(y, yNoise, result, label, prediction)
     subplot(1,4,4)
     imshow(reshape(difference, 192, 168));
     title('diff');
+    if saveFlag
+        saveas(misclassificationIdx, saveFileName);
+    end
 end
 
 
