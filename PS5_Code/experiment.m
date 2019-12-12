@@ -54,7 +54,7 @@ function psnr1 = experiment(img, n,K, h, L, M, DIM1, DIM2, noise, lambda, sensin
         end
     end
     % figure;imshow(img,[]);
-    figure;imshow(img_recon,[]);
+    % figure;imshow(img_recon,[]);
     
     psnr1 = psnr(img, img_recon);
 end
